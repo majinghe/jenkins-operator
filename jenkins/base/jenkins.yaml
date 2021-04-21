@@ -1,0 +1,135 @@
+apiVersion: jenkins.io/v1alpha2
+kind: Jenkins
+metadata:
+  name: jenkins
+spec:
+  configurationAsCode:
+    configurations: 
+    - name: jenkins-config
+  service:
+    type: ClusterIP
+    port: 8080
+  serviceAccount:
+    annotations:
+      kubernetes.io/service-account: jenkins
+  master:
+    disableCSRFProtection: false
+    basePlugins:
+    - name: kubernetes
+      version: "1.29.2"
+    - name: workflow-job
+      version: "2.40"
+    - name: workflow-aggregator
+      version: "2.6"
+    - name: git
+      version: "4.7.0"
+    - name: job-dsl
+      version: "1.77"
+    - name: configuration-as-code
+      version: "1.47"
+    - name: kubernetes-credentials-provider
+      version: "0.15"
+    plugins:
+    - name: ldap
+      version: "2.4"
+    - name: matrix-auth
+      version: "2.6.6"
+    - name: mailer
+      version: "1.33"
+    - name: github
+      version: "1.33.1"
+    - name: credentials
+      version: "2.3.15"
+    - name: authorize-project
+      version: "1.4.0"
+    - name: anchore-container-scanner
+      version: "1.0.23"
+    - name: github-pullrequest
+      version: "0.2.8"
+    - name: blueocean
+      version: "1.24.5"
+    - name: slack
+      version: "2.46"
+    - name: ghprb
+      version: "1.42.2"
+    - name: workflow-cps-global-lib
+      version: "2.18"
+    containers:
+    - name: jenkins-master
+      image: jenkins/jenkins:lts
+      imagePullPolicy: Always
+      env:
+      - name: JENKINS_HOME
+        value: /var/lib/jenkins
+      livenessProbe:
+        failureThreshold: 12
+        httpGet:
+          path: /login
+          port: http
+          scheme: HTTP
+        initialDelaySeconds: 80
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      readinessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /login
+          port: http
+          scheme: HTTP
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 1
+      resources:
+        limits:
+          cpu: 1500m
+          memory: 2Gi
+        requests:
+          cpu: "1"
+          memory: 500Mi
+      securityContext:
+        runAsUser: 0
+        fsGroup: 0
+      volumeMounts:
+      - mountPath: /var/lib/jenkins/jobs # Jenkins home volume
+        subPath: jobs
+        name: jenkins-master
+    - name: backup
+      image: virtuslab/jenkins-operator-backup-pvc:v0.1.0 # look at backup/pvc directory
+      imagePullPolicy: IfNotPresent
+      env:
+      - name: BACKUP_DIR
+        value: /backup
+      - name: JENKINS_HOME
+        value: /var/lib/jenkins
+      - name: BACKUP_COUNT
+        value: "3" # keep only the 2 most recent backups
+      volumeMounts:
+      - mountPath: /var/lib/jenkins # Jenkins home volume
+        name: jenkins-master
+      securityContext:
+        runAsUser: 0
+        fsGroup: 0
+    volumes:
+    - name: jenkins-master
+      persistentVolumeClaim:
+        claimName: jenkins-master
+  backup:
+    containerName: backup # container name is responsible for backup
+    action:
+      exec:
+        command:
+        - /home/user/bin/backup.sh # this command is invoked on "backup" container to make backup, for example /home/user/bin/backup.sh <backup_number>, <backup_number> is passed by operator
+    getLatestAction:
+      exec:
+        command:
+        - /home/user/bin/get-latest.sh 
+    interval: 300 # how often make backup in seconds
+    makeBackupBeforePodDeletion: true # make a backup before pod deletion
+  restore:
+    containerName: backup
+    action:
+      exec:
+        command:
+        - /home/user/bin/restore.sh 

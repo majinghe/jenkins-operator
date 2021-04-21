@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins-config
+data:
+  jenkins.yaml: |
+    security:
+      apiToken:
+        creationOfLegacyTokenEnabled: false
+        tokenGenerationOnCreationEnabled: false
+        usageStatisticsEnabled: true
+      globalJobDslSecurityConfiguration:
+        useScriptSecurity: false
+      scriptApproval:
+        approvedSignatures:
+        - "method groovy.json.JsonSlurper parse java.io.Reader"
+    unclassified:
+      slackNotifier:
+        teamDomain: "your-slack-domain"
+        tokenCredentialId: "slack-token"
+      globalLibraries:
+        libraries:
+        - defaultVersion: "master"
+          name: "devops-pipeline"
+          retriever:
+            modernSCM:
+              scm:
+                git:
+                  credentialsId: "your-github-ssh-key"
+                  remote: "your-devops-share-library-github-url"
+                  traits:
+                  - "branchDiscoveryTrait"
+      gitHubPluginConfig:
+        configs:
+          - name: "GitHub"
+            apiUrl: "https://api.github.com/v3/"
+            credentialsId: "github-token"
+            manageHooks: true
+      ghprbTrigger:
+        githubAuth:
+          - credentialsId: "github-token"
+            description: "IBM GitHub"
+            serverAPIUrl: "https://api.github.com/v3/"
+    jenkins:
+      clouds:
+      - kubernetes:
+          jenkinsTunnel: "jenkins-operator-slave-jenkins.jenkins.svc.cluster.local:50000"
+          jenkinsUrl: "http://jenkins-operator-http-jenkins.jenkins.svc.cluster.local:8080"
+          name: "kubernetes"
+          namespace: "jenkins"
+          retentionTimeout: 15
+          serverUrl: "https://kubernetes.default.svc.cluster.local:443"
+      systemMessage: "<Cloud Native DevSecOps>"
+      securityRealm:
+        # your ldap configurationn
+        ldap:
+          configurations:
+            - server: ""
+              rootDN: ""
+              userSearchBase: ""
+              userSearch: ""
+              groupSearchBase: ""
+              groupMembershipStrategy:
+                fromGroupSearch:
+                   filter: ""
+              managerDN: ""
+              managerPasswordSecret: ""
+              displayNameAttributeName: ""
+              mailAddressAttributeName: ""
+              ignoreIfUnavailable: ""
+              inhibitInferRootDN: ""
+      authorizationStrategy:
+        globalMatrix:
+          permissions:
+            - "Overall/Read:anonymous"
+            - "Overall/Administer:authenticated"
+      authorizationStrategy:
+        projectMatrix:
+          permissions:
+          - "Agent/Build:authenticated"
+          - "Agent/Build:devops008@sina.com"
+          - "Agent/Configure:authenticated"

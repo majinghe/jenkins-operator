@@ -1,0 +1,13 @@
+apiVersion: jenkins.io/v1alpha2
+kind: Jenkins
+metadata:
+  name: jenkins
+spec:
+  seedJobs:
+  - id: Demo
+    targets: "cicd/jobs/demo_pipeline.groovy"
+    credentialType: basicSSHUserPrivateKey
+    credentialID: your-github-ssh-key
+    description: "CI/CD Repo"
+    repositoryBranch: master
+    repositoryUrl: your-cici-github-url
