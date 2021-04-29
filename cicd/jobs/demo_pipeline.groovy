@@ -19,8 +19,8 @@ pipelineJob('Demo') {
             scm {
                 git {
                     remote {
-                        url('your-github-repo-url')
-                        credentials('your-github-ssh-key')
+                        url('git@github.com:majinghe/jenkins-operator.git')
+                        credentials('github-ssh-key')
                     }
                     branches('*/master')
                 }

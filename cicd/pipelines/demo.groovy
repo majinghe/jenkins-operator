@@ -14,8 +14,8 @@ podTemplate(
 ) {
     node(label) {
         container('jnlp'){
-            stage("Fetch Source Code"){
-              sh "hello world"
+            stage("Hello World"){
+              sh "This is xiaomage, focus on Cloud Native DevSecOps!!!"
             }
         }
     }
