@@ -8,7 +8,6 @@ resources:
 - config.yaml
 - jenkins.yaml
 - jenkins-rbac.yaml
-- jenkins-pvc.yaml
 
 namespace: jenkins
 

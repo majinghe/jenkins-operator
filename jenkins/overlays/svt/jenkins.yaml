@@ -7,7 +7,7 @@ spec:
   - id: Demo
     targets: "cicd/jobs/demo_pipeline.groovy"
     credentialType: basicSSHUserPrivateKey
-    credentialID: your-github-ssh-key
+    credentialID: github-ssh-key
     description: "CI/CD Repo"
-    repositoryBranch: master
-    repositoryUrl: your-cici-github-url
+    repositoryBranch: main
+    repositoryUrl: git@github.com:majinghe/jenkins-operator.git

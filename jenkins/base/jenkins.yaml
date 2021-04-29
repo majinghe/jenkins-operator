@@ -83,11 +83,11 @@ spec:
         timeoutSeconds: 1
       resources:
         limits:
-          cpu: 1500m
+          cpu: 800m
           memory: 2Gi
         requests:
-          cpu: "1"
-          memory: 500Mi
+          cpu: "200m"
+          memory: 100Mi
       securityContext:
         runAsUser: 0
         fsGroup: 0
@@ -95,41 +95,40 @@ spec:
       - mountPath: /var/lib/jenkins/jobs # Jenkins home volume
         subPath: jobs
         name: jenkins-master
-    - name: backup
-      image: virtuslab/jenkins-operator-backup-pvc:v0.1.0 # look at backup/pvc directory
-      imagePullPolicy: IfNotPresent
-      env:
-      - name: BACKUP_DIR
-        value: /backup
-      - name: JENKINS_HOME
-        value: /var/lib/jenkins
-      - name: BACKUP_COUNT
-        value: "3" # keep only the 2 most recent backups
-      volumeMounts:
-      - mountPath: /var/lib/jenkins # Jenkins home volume
-        name: jenkins-master
-      securityContext:
-        runAsUser: 0
-        fsGroup: 0
+#    - name: backup
+#      image: virtuslab/jenkins-operator-backup-pvc:v0.1.0 # look at backup/pvc directory
+#      imagePullPolicy: IfNotPresent
+#      env:
+#      - name: BACKUP_DIR
+#        value: /backup
+#      - name: JENKINS_HOME
+#        value: /var/lib/jenkins
+#      - name: BACKUP_COUNT
+#        value: "3" # keep only the 2 most recent backups
+#      volumeMounts:
+#      - mountPath: /var/lib/jenkins # Jenkins home volume
+#        name: jenkins-master
+#      securityContext:
+#        runAsUser: 0
+#        fsGroup: 0
     volumes:
     - name: jenkins-master
-      persistentVolumeClaim:
-        claimName: jenkins-master
-  backup:
-    containerName: backup # container name is responsible for backup
-    action:
-      exec:
-        command:
-        - /home/user/bin/backup.sh # this command is invoked on "backup" container to make backup, for example /home/user/bin/backup.sh <backup_number>, <backup_number> is passed by operator
-    getLatestAction:
-      exec:
-        command:
-        - /home/user/bin/get-latest.sh 
-    interval: 300 # how often make backup in seconds
-    makeBackupBeforePodDeletion: true # make a backup before pod deletion
-  restore:
-    containerName: backup
-    action:
-      exec:
-        command:
-        - /home/user/bin/restore.sh 
+      emptyDir: {}
+#  backup:
+#    containerName: backup # container name is responsible for backup
+#    action:
+#      exec:
+#        command:
+#        - /home/user/bin/backup.sh # this command is invoked on "backup" container to make backup, for example /home/user/bin/backup.sh <backup_number>, <backup_number> is passed by operator
+#    getLatestAction:
+#      exec:
+#        command:
+#        - /home/user/bin/get-latest.sh 
+#    interval: 300 # how often make backup in seconds
+#    makeBackupBeforePodDeletion: true # make a backup before pod deletion
+#  restore:
+#    containerName: backup
+#    action:
+#      exec:
+#        command:
+#        - /home/user/bin/restore.sh 

@@ -10,8 +10,8 @@ resources:
 patchesStrategicMerge:
 - jenkins.yaml
 
-generators:
- - ./kops-secret.yaml
+#generators:
+# - ./kops-secret.yaml
 
 generatorOptions:
   labels:
