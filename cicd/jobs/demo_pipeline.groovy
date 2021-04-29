@@ -22,7 +22,7 @@ pipelineJob('Demo') {
                         url('git@github.com:majinghe/jenkins-operator.git')
                         credentials('github-ssh-key')
                     }
-                    branches('*/master')
+                    branches('*/main')
                 }
             }
             scriptPath('cicd/pipelines/demo.groovy')
