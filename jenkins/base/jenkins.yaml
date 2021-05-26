@@ -39,7 +39,7 @@ spec:
     - name: github
       version: "1.33.1"
     - name: credentials
-      version: "2.3.15"
+      version: "2.3.17"
     - name: authorize-project
       version: "1.4.0"
     - name: anchore-container-scanner
